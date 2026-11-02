@@ -1,4 +1,4 @@
-name: Android Debug APK
+name: Android Debug APK and Security Tests
 
 on:
   push:
@@ -11,6 +11,23 @@ permissions:
   contents: read
 
 jobs:
+  firestore-rules-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - name: Install security test dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run Firestore emulator rules tests
+        run: npm run test:rules
+
   build:
     runs-on: ubuntu-latest
     steps:
