@@ -4,17 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,24 +23,24 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val Ink = Color(0xFF090A0D)
-private val Panel = Color(0xFF15171D)
-private val Accent = Color(0xFFE51B2B)
-private val Muted = Color(0xFF9296A1)
-private val Paper = Color(0xFFF5F5F7)
+private val Ink = Color(0xFF050806)
+private val Panel = Color(0xFF111A14)
+private val Green = Color(0xFF16F05A)
+private val Muted = Color(0xFF98A69C)
+private val Paper = Color(0xFFF4FFF6)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { SuhaebTxApp() }
+        setContent { SuhaebChatApp() }
     }
 }
 
 @Composable
-private fun SuhaebTxApp() {
+private fun SuhaebChatApp() {
     var selected by remember { mutableIntStateOf(0) }
     MaterialTheme(colorScheme = darkColorScheme(
-        background = Ink, surface = Panel, primary = Accent,
+        background = Ink, surface = Panel, primary = Green,
         onBackground = Paper, onSurface = Paper
     )) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -57,17 +52,12 @@ private fun SuhaebTxApp() {
                         NavigationBarItem(selected == 1, { selected = 1 }, icon = { Icon(Icons.Default.Groups, null) }, label = { Text("المجموعات") })
                         NavigationBarItem(selected == 2, { selected = 2 }, icon = { Icon(Icons.Default.Settings, null) }, label = { Text("الإعدادات") })
                     }
-                },
-                floatingActionButton = {
-                    FloatingActionButton(onClick = { selected = 0 }, containerColor = Accent, contentColor = Color.White) {
-                        Icon(Icons.Default.Add, contentDescription = "محادثة جديدة")
-                    }
                 }
             ) { padding ->
                 when (selected) {
-                    0 -> ChatsScreen(Modifier.padding(padding))
-                    1 -> PlaceholderScreen("المجموعات", "ستظهر مجموعاتك هنا بعد إعداد الخدمة")
-                    else -> PlaceholderScreen("الإعدادات", "الملف الشخصي والخصوصية وإعدادات الحساب")
+                    0 -> ChatsHome(Modifier.padding(padding))
+                    1 -> EmptyFeatureScreen("المجموعات", "ستظهر مجموعاتك هنا بعد تفعيل الحساب والخدمة السحابية")
+                    else -> SettingsHome(Modifier.padding(padding))
                 }
             }
         }
@@ -75,72 +65,96 @@ private fun SuhaebTxApp() {
 }
 
 @Composable
-private fun ChatsScreen(modifier: Modifier = Modifier) {
-    val sampleChats = listOf(
-        ChatRow("سارة", "أهلاً! كيفك؟", "10:42", "س", true),
-        ChatRow("أحمد", "وصلت الصورة، شكراً", "09:18", "أ", false),
-        ChatRow("فريق SUHAEB", "تم إنشاء المجموعة", "أمس", "S", false),
-        ChatRow("محمد", "مكالمة صوتية فائتة", "أمس", "م", false)
-    )
-    Column(modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-        Spacer(Modifier.height(24.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+private fun ChatsHome(modifier: Modifier = Modifier) {
+    Column(
+        modifier.fillMaxSize().background(Ink).padding(horizontal = 22.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(Modifier.height(30.dp))
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("SUHAEB", color = Paper, fontSize = 25.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
-                Text("TX  •  تواصل بطريقتك", color = Accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text("SUHAEB", color = Paper, fontSize = 27.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+                Text("CHAT  •  دردش بطريقتك", color = Green, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
-            Box(Modifier.size(42.dp).background(Accent, CircleShape), contentAlignment = Alignment.Center) {
-                Text("S", color = Color.White, fontWeight = FontWeight.Black, fontSize = 22.sp)
+            Box(Modifier.size(48.dp).background(Green, CircleShape), contentAlignment = Alignment.Center) {
+                Text("S", color = Ink, fontWeight = FontWeight.Black, fontSize = 25.sp)
             }
         }
-        Spacer(Modifier.height(24.dp))
-        OutlinedTextField(
-            value = "", onValueChange = {}, readOnly = true,
-            placeholder = { Text("ابحث عن محادثة", color = Muted) },
-            leadingIcon = { Icon(Icons.Default.Search, null, tint = Muted) },
-            modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = Panel, focusedContainerColor = Panel,
-                unfocusedBorderColor = Panel, focusedBorderColor = Accent
-            )
-        )
         Spacer(Modifier.height(26.dp))
-        Text("رسائلك", color = Paper, fontSize = 21.sp, fontWeight = FontWeight.Bold)
-        Text("مساحة آمنة لمحادثاتك", color = Muted, fontSize = 13.sp)
-        Spacer(Modifier.height(14.dp))
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(sampleChats) { chat ->
-                Row(
-                    Modifier.fillMaxWidth().background(Panel, RoundedCornerShape(18.dp))
-                        .clickable { }.padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(Modifier.size(52.dp).background(if (chat.online) Accent.copy(alpha = .22f) else Color(0xFF292C35), CircleShape), contentAlignment = Alignment.Center) {
-                        Text(chat.initial, color = Paper, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(chat.name, color = Paper, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                        Spacer(Modifier.height(4.dp))
-                        Text(chat.message, color = Muted, fontSize = 13.sp)
-                    }
-                    Text(chat.time, color = Muted, fontSize = 11.sp)
-                }
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Panel,
+            shape = RoundedCornerShape(18.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Green.copy(alpha = .22f))
+        ) {
+            Column(Modifier.padding(18.dp)) {
+                Text("أهلاً بك في SUHAEB CHAT", color = Paper, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(6.dp))
+                Text("مساحة تواصل مستقلة بهويتك، وحساباتك ومحادثاتك الخاصة.", color = Muted, fontSize = 13.sp)
             }
         }
         Spacer(Modifier.weight(1f))
-        Text("واجهة أولية — المحادثات المعروضة تجريبية وليست رسائل حقيقية بعد.",
-            color = Muted, fontSize = 11.sp, textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp))
+        Box(
+            Modifier.size(92.dp).background(Panel, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Default.Chat, contentDescription = null, tint = Green, modifier = Modifier.size(42.dp))
+        }
+        Spacer(Modifier.height(18.dp))
+        Text("لسه ما عندك محادثات", color = Paper, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "بعد ربط Firebase وتفعيل التسجيل، رح تقدر تبدأ محادثات حقيقية وتتزامن رسائلك عبر السحابة.",
+            color = Muted, fontSize = 13.sp, textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.weight(1f))
+        Text(
+            "نسخة تأسيسية — لا توجد رسائل تجريبية أو حسابات وهمية.",
+            color = Muted, fontSize = 10.sp, textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp)
+        )
     }
 }
 
-private data class ChatRow(val name: String, val message: String, val time: String, val initial: String, val online: Boolean)
+@Composable
+private fun SettingsHome(modifier: Modifier = Modifier) {
+    Column(modifier.fillMaxSize().background(Ink).padding(22.dp)) {
+        Text("الإعدادات", color = Paper, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(18.dp))
+        listOf(
+            "الحساب والملف الشخصي" to "تسجيل الدخول والاسم والصورة واسم المستخدم",
+            "الخصوصية والأمان" to "إعدادات الظهور والقراءة وقفل المحادثات",
+            "الإشعارات" to "تنبيهات الرسائل والمجموعات",
+            "اللغة والمظهر" to "العربية والإنجليزية والثيمات",
+            "حول التطبيق" to "SUHAEB CHAT"
+        ).forEach { (title, subtitle) ->
+            Surface(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                color = Panel, shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(title, color = Paper, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                    Spacer(Modifier.height(4.dp))
+                    Text(subtitle, color = Muted, fontSize = 12.sp)
+                }
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text("هذه الأقسام ستُفعّل تدريجياً بعد إعداد خدمات الحساب وقاعدة البيانات.", color = Muted, fontSize = 12.sp)
+    }
+}
 
 @Composable
-private fun PlaceholderScreen(title: String, subtitle: String) {
-    Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(title, color = Paper, fontSize = 25.sp, fontWeight = FontWeight.Bold)
+private fun EmptyFeatureScreen(title: String, subtitle: String) {
+    Column(
+        Modifier.fillMaxSize().background(Ink).padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(Icons.Default.Groups, contentDescription = null, tint = Green, modifier = Modifier.size(54.dp))
+        Spacer(Modifier.height(18.dp))
+        Text(title, color = Paper, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
         Text(subtitle, color = Muted, textAlign = TextAlign.Center)
     }
