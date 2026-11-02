@@ -40,8 +40,27 @@ service cloud.firestore {
         && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.username)).data.uid == request.auth.uid
         && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.username)).data.displayName == request.resource.data.displayName;
 
-      // Profile identity and username are immutable in this release.
-      allow update, delete: if false;
+      // One-time migration for accounts created before username onboarding.
+      allow update: if owns(uid)
+        && !('username' in resource.data)
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'uid', 'displayName', 'username', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName', 'username', 'updatedAt'
+        ])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 60
+        && validHandle(request.resource.data.username)
+        && request.resource.data.updatedAt == request.time
+        && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.username)).data.uid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.username)).data.displayName == request.resource.data.displayName;
+
+      allow delete: if false;
     }
 
     match /usernames/{handle} {
