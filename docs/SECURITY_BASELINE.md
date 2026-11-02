@@ -1,37 +1,35 @@
 # Security Baseline
 
-This is a design checklist, not a claim that production security is already implemented.
+This document distinguishes implemented controls from launch requirements.
 
-## Identity
-- Firebase Authentication is the identity provider candidate.
-- Public usernames must be unique and separate from private email/phone fields.
-- Never trust a client-supplied role, owner ID, participant list, or moderation status.
-- Account deletion and recovery need explicit, tested flows.
+## Implemented in the current starter
+- Firebase Authentication email/password flow with verified-email gating in the Android UI.
+- Firestore rules require the verified-email token claim.
+- User profiles are owner-readable, cannot be listed, and have a narrow field allowlist.
+- Profile creation requires server timestamps; profile updates cannot change uid or createdAt.
+- Chat metadata is read-only for verified members. Chat writes, nested messages, and unknown collections are denied.
+- Storage remains deny-all until upload paths and UI are implemented.
+- Emulator tests cover authenticated/unauthenticated access and default-deny behavior.
 
-## Firestore
-- Deny access by default.
-- A user may read a conversation only when their authenticated UID is a participant.
-- A user may create a message only as themselves and only inside a conversation they belong to.
-- Validate immutable fields, allowed state transitions, payload sizes, and timestamps.
-- Do not permit clients to grant themselves roles or alter another user's privacy settings.
-- Add emulator tests for allowed and denied cases before deployment.
+## Not implemented / launch blockers
+- Direct chat creation, sending messages, group membership and trusted server-side membership changes.
+- Block/report controls, anti-spam rate limiting and moderation.
+- Storage media authorization and uploads.
+- App Check, FCM, account export/deletion and retention.
+- End-to-end encryption (must not be claimed).
+- Production rules deployment and a signed release build.
 
-## Storage
-- Require authentication and conversation membership.
-- Restrict MIME types and file sizes.
-- Prevent path spoofing and unauthorized overwrite/delete.
-- Do not expose private media through public permanent URLs.
-
-## Privacy
-- Presence, last-seen, read receipts, typing indicators, and profile discovery must honor user settings.
-- Blocking must prevent new direct messages and be enforced server-side.
-- Report and abuse controls must not depend on client-only checks.
+## Firestore policy
+- Deny by default.
+- Require a verified Firebase email for profile and chat reads/writes.
+- Keep profile fields narrowly allowlisted and immutable identifiers unchanged.
+- Only permit chat reads for a member; do not allow client chat creation until recipient discovery, abuse controls, and membership invariants are implemented.
+- Run the Firebase Emulator Suite tests before any deployment.
 
 ## Secrets and release
-- Never commit Firebase service-account keys, signing keys, passwords, or API secrets.
-- Keep signing credentials in protected GitHub Actions secrets.
-- Do not ship admin credentials or privileged service tokens in the APK.
-- Debug builds are for testing; release builds require signing and release review.
+- Never commit service-account credentials, signing keys, passwords, or admin tokens.
+- A Firebase Android configuration file is not a service-account key; restrict API keys with appropriate Google Cloud API and Android app restrictions.
+- Debug APKs are test builds. Release builds need protected signing secrets and review.
 
 ## Launch gate
-No production launch until Firestore/Storage rules, emulator tests, abuse controls, privacy behavior, and account recovery have been reviewed.
+No production launch until rules tests, Storage authorization, abuse controls, account recovery, privacy behavior, and device tests have been reviewed.
