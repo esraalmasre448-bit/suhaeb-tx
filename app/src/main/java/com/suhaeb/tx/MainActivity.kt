@@ -146,10 +146,19 @@ private fun AuthScreen(onAuthenticated: () -> Unit) {
                                     auth.signOut()
                                     message = "تحقق من بريدك الإلكتروني أولاً، ثم أعد تسجيل الدخول."
                                 } else {
-                                    FirebaseFirestore.getInstance().collection("users").document(account.uid).set(
-                                        mapOf("uid" to account.uid, "displayName" to (account.displayName ?: account.email.orEmpty().substringBefore("@")), "createdAt" to FieldValue.serverTimestamp(), "updatedAt" to FieldValue.serverTimestamp()),
-                                        com.google.firebase.firestore.SetOptions.merge()
-                                    ).await()
+                                    val userDoc = FirebaseFirestore.getInstance().collection("users").document(account.uid)
+                                    val existingProfile = userDoc.get().await()
+                                    val profileData = mutableMapOf<String, Any>(
+                                        "uid" to account.uid,
+                                        "displayName" to (account.displayName ?: account.email.orEmpty().substringBefore("@")),
+                                        "updatedAt" to FieldValue.serverTimestamp()
+                                    )
+                                    if (!existingProfile.exists()) {
+                                        profileData["createdAt"] = FieldValue.serverTimestamp()
+                                        userDoc.set(profileData).await()
+                                    } else {
+                                        userDoc.update("updatedAt", FieldValue.serverTimestamp()).await()
+                                    }
                                     onAuthenticated()
                                 }
                             }
