@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -159,7 +160,14 @@ private fun AuthScreen(onAuthenticated: () -> Unit) {
                             }
                         }
                     } catch (e: Exception) {
-                        message = friendlyError(e)
+                        if (e is FirebaseAuthUserCollisionException) {
+                            // The address already belongs to an account: guide the user to sign in.
+                            create = false
+                            reset = false
+                            message = "هذا البريد مسجل مسبقاً. انتقلنا إلى تسجيل الدخول؛ أدخل كلمة المرور، أو اضغط «نسيت كلمة المرور؟» إذا نسيتها."
+                        } else {
+                            message = friendlyError(e)
+                        }
                     }
                     busy = false
                 }
