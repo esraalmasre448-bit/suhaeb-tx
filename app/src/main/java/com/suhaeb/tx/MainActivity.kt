@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -399,7 +400,7 @@ private fun ChatsHome(modifier: Modifier, uid: String, onOpenChat: (String, Stri
                                         )).await()
                                     } else {
                                         val members = current.get("memberIds") as? List<*>
-                                        if (members?.contains(uid) != true || members.contains(peerUid).not()) {
+                                        if (members == null || !members.contains(uid) || !members.contains(peerUid)) {
                                             error = "تعذر فتح المحادثة بسبب عدم تطابق العضوية."
                                         }
                                     }
