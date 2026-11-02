@@ -1,24 +1,11 @@
 rules_version = '2';
+
 service firebase.storage {
   match /b/{bucket}/o {
-    function signedIn() { return request.auth != null; }
-    function chatMember(chatId) {
-      return signedIn() &&
-        firestore.exists(/databases/(default)/documents/chats/$(chatId)) &&
-        request.auth.uid in firestore.get(/databases/(default)/documents/chats/$(chatId)).data.memberIds;
+    // Media upload and download are not implemented in the current Android build.
+    // Keep Storage closed until the upload paths, ownership checks and UI are tested.
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
-    match /profile_images/{uid}/{fileName} {
-      allow read: if signedIn();
-      allow write: if signedIn() && request.auth.uid == uid
-        && request.resource.size < 5 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*');
-    }
-    match /chat_media/{chatId}/{uid}/{fileName} {
-      allow read: if chatMember(chatId);
-      allow write: if signedIn() && request.auth.uid == uid && chatMember(chatId)
-        && request.resource.size < 50 * 1024 * 1024
-        && request.resource.contentType.matches('(image/.*|video/.*|audio/.*|application/pdf|application/octet-stream)');
-    }
-    match /{allPaths=**} { allow read, write: if false; }
   }
 }
