@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "791169638093",
+    "project_id": "suhaeb-chat",
+    "storage_bucket": "suhaeb-chat.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:791169638093:android:5e44f1aa9087dcd24dd384",
+        "android_client_info": {
+          "package_name": "com.suhaeb.tx"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBudi2XcOGYwPsVEEoV3bMO8xs6ZQ4bDM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
