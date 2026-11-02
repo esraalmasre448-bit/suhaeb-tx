@@ -25,6 +25,7 @@ SUHAEB CHAT is an independent native Android messenger built with Kotlin and Jet
 - Profile get/create/update flow: implemented; Firestore access remains blocked until reviewed rules are deployed.
 - Chat list listener: present but cannot return useful data until chat creation and reads are enabled.
 - Direct messaging, group management, attachments, voice notes, notifications, statuses, calls, block/report and end-to-end encryption: not implemented.
+- Phone-number contact discovery and invitations: security design documented in `docs/CONTACT_DISCOVERY_DESIGN.md`; implementation is blocked pending verified phone linking and a trusted, rate-limited lookup backend.
 - Firestore emulator security tests are being added in this phase.
 - Storage is intentionally deny-all.
 - Debug APK build is not a signed production release.
