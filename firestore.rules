@@ -6,8 +6,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Enforce the same verified-email requirement on the server,
-    // not only in the Android UI.
     function verifiedUser() {
       return signedIn() && request.auth.token.email_verified == true;
     }
@@ -27,25 +25,28 @@ service cloud.firestore {
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() > 0
-        && request.resource.data.displayName.size() <= 60;
+        && request.resource.data.displayName.size() <= 60
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
 
       allow update: if owns(uid)
         && request.resource.data.keys().hasOnly([
           'uid', 'displayName', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.uid == resource.data.uid
+        && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'displayName', 'createdAt', 'updatedAt'
+          'displayName', 'updatedAt'
         ])
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() > 0
-        && request.resource.data.displayName.size() <= 60;
+        && request.resource.data.displayName.size() <= 60
+        && request.resource.data.updatedAt == request.time;
 
       allow delete: if false;
     }
 
-    // The current Android app only queries chats containing the signed-in UID.
-    // Chat creation and all message/nested writes remain disabled until implemented.
+    // Read-only until the direct-message creation and membership flows are implemented.
     match /chats/{chatId} {
       allow get, list: if verifiedUser()
         && request.auth.uid in resource.data.memberIds;

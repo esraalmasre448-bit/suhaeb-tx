@@ -1,0 +1,13 @@
+{
+  "name": "suhaeb-chat-security-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:rules": "firebase emulators:exec --only firestore --project demo-suhaeb-chat \"node --test tests/firestore.rules.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "4.0.1",
+    "firebase": "11.0.2",
+    "firebase-tools": "14.12.1"
+  }
+}
