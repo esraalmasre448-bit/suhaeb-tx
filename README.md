@@ -1,21 +1,23 @@
-# SUHAEB TX
+# SUHAEB CHAT
 
-Standalone Android messaging app built with Kotlin and Jetpack Compose.
+Standalone Arabic-first Android messaging app built with Kotlin and Jetpack Compose.
 
-## Initial status
-This commit establishes the Android app foundation and an Arabic-first starter interface. Firebase credentials are intentionally not included. Live authentication, messaging, uploads, and calls must not be represented as working until a Firebase project and secure backend rules are configured and tested.
-
-## Android
-- Application ID: `com.suhaeb.tx`
-- Kotlin + Jetpack Compose
-- Minimum Android: API 24
-- Target SDK: 35
-
-## Firebase setup
-1. Create a Firebase project and register package `com.suhaeb.tx`.
-2. Add the generated `google-services.json` to `app/` (do not commit service-account keys).
-3. Enable Authentication, Firestore, and Storage after reviewing security rules.
-4. Configure server-enforced authorization, rate limits, abuse reporting, and retention policies before production.
+## Current implementation
+- Native Android shell with SUHAEB CHAT black/neon-green branding.
+- Firebase email/password registration, verification-link flow, sign-in and password recovery.
+- Owner-scoped profile bootstrap and a read-only chat-list listener.
+- Firestore and Storage are intentionally restrictive; direct messages, media and groups are not enabled yet.
 
 ## Build
-GitHub Actions builds a debug APK. A debug APK is not a signed production release.
+GitHub Actions builds a debug APK. A debug APK is for testing and is not a signed production release.
+
+## Security tests
+Install Node.js 20 and Java 17, then run:
+```sh
+npm install
+npm run test:rules
+```
+The command starts the Firestore Emulator and runs authorization tests against `firestore.rules`.
+
+## Firebase
+The Android Firebase config file identifies the Firebase project and app; it is not a service-account credential. Never commit service-account JSON, signing keys, passwords, or admin tokens. Do not deploy rules until emulator tests pass and the schema has been reviewed.
