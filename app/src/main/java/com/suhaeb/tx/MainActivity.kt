@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
@@ -131,6 +132,7 @@ private fun AuthScreen(onAuthenticated: () -> Unit) {
                             reset -> { auth.sendPasswordResetEmail(email.trim()).await(); message = "إذا كان البريد مسجلاً، ستصلك رسالة استعادة كلمة المرور." }
                             create -> {
                                 val result = auth.createUserWithEmailAndPassword(email.trim(), password).await()
+                                result.user?.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name.trim()).build())?.await()
                                 result.user?.sendEmailVerification()?.await()
                                 auth.signOut()
                                 message = "أنشأنا الحساب وأرسلنا رابط التحقق إلى بريدك. افتح الرابط ثم سجّل الدخول."
@@ -145,7 +147,7 @@ private fun AuthScreen(onAuthenticated: () -> Unit) {
                                     message = "تحقق من بريدك الإلكتروني أولاً، ثم أعد تسجيل الدخول."
                                 } else {
                                     FirebaseFirestore.getInstance().collection("users").document(account.uid).set(
-                                        mapOf("uid" to account.uid, "email" to account.email, "updatedAt" to FieldValue.serverTimestamp()),
+                                        mapOf("uid" to account.uid, "displayName" to (account.displayName ?: account.email.orEmpty().substringBefore("@")), "createdAt" to FieldValue.serverTimestamp(), "updatedAt" to FieldValue.serverTimestamp()),
                                         com.google.firebase.firestore.SetOptions.merge()
                                     ).await()
                                     onAuthenticated()
