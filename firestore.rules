@@ -6,11 +6,16 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function owns(uid) {
-      return signedIn() && request.auth.uid == uid;
+    // Enforce the same verified-email requirement on the server,
+    // not only in the Android UI.
+    function verifiedUser() {
+      return signedIn() && request.auth.token.email_verified == true;
     }
 
-    // User profile: each account can access only its own profile.
+    function owns(uid) {
+      return verifiedUser() && request.auth.uid == uid;
+    }
+
     match /users/{uid} {
       allow get: if owns(uid);
       allow list: if false;
@@ -39,11 +44,10 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // The current Android build only listens for chats containing its UID.
-    // Chat creation, message writes, groups, statuses and other collections
-    // remain denied until their client flows and data contracts are implemented.
+    // The current Android app only queries chats containing the signed-in UID.
+    // Chat creation and all message/nested writes remain disabled until implemented.
     match /chats/{chatId} {
-      allow get, list: if signedIn()
+      allow get, list: if verifiedUser()
         && request.auth.uid in resource.data.memberIds;
       allow create, update, delete: if false;
 
@@ -52,7 +56,6 @@ service cloud.firestore {
       }
     }
 
-    // Deny every collection not explicitly enabled above.
     match /{document=**} {
       allow read, write: if false;
     }
