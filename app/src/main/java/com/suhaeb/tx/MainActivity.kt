@@ -227,7 +227,8 @@ private fun MainArea(uid: String, onSignOut: () -> Unit) {
     var openedChat by remember { mutableStateOf<Pair<String, String>?>(null) }
     LaunchedEffect(uid) {
         profileReady = try {
-            FirebaseFirestore.getInstance().collection("users").document(uid).get().await().exists()
+            val profile = FirebaseFirestore.getInstance().collection("users").document(uid).get().await()
+            profile.exists() && !profile.getString("username").isNullOrBlank()
         } catch (_: Exception) {
             false
         }
@@ -299,13 +300,16 @@ private fun ProfileSetup(uid: String, onComplete: () -> Unit, onSignOut: () -> U
                             error = "هذا المعرّف مستخدم. اختر معرّفاً آخر."
                         } else {
                             val batch = db.batch()
-                            batch.set(userRef, mapOf(
+                            val profileSnapshot = userRef.get().await()
+                            val profileData = mapOf(
                                 "uid" to uid,
                                 "displayName" to displayName.trim(),
                                 "username" to username,
-                                "createdAt" to FieldValue.serverTimestamp(),
+                                "createdAt" to (profileSnapshot.getTimestamp("createdAt") ?: FieldValue.serverTimestamp()),
                                 "updatedAt" to FieldValue.serverTimestamp()
-                            ))
+                            )
+                            if (profileSnapshot.exists()) batch.update(userRef, profileData)
+                            else batch.set(userRef, profileData)
                             batch.set(handleRef, mapOf(
                                 "uid" to uid,
                                 "displayName" to displayName.trim(),
